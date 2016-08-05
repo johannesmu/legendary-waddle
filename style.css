@@ -1,0 +1,15 @@
+.product-image{
+    width:100%;
+}
+.price::before{
+    content:"\0024";
+    display:"inline-block";
+    padding-right:5px;
+}
+.number{
+    max-width:80px;
+}
+.product-row{
+    margin-bottom: 10px;
+    background-color:#fcfcfc;
+}
