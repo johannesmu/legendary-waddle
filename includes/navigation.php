@@ -41,6 +41,10 @@
       }
       ?>
     </div>
+    <div class="col-md-6 text-right">
+      <span class="glyphicon glyphicon-shopping-cart">
+      </span>
+    </div>
   </div>
 </div>
 
