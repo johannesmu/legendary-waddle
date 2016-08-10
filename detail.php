@@ -4,7 +4,7 @@ if(count($_GET)>0){
     if(is_numeric($id)){
       //sanitise id to prevent XSS
       $id = filter_var($id,FILTER_SANITIZE_NUMBER_INT);
-      include ("dbconnection.php");
+      include ("includes/dbconnection.php");
       $query = "SELECT * FROM products WHERE id='$id'";
       $product = array();
       $result = $dbconnection->query($query);
@@ -24,9 +24,9 @@ else{
 ?>
 <!doctype html>
 <html>
-    <?php include("head.php");?>
+    <?php include("includes/head.php");?>
     <body>
-        <?php include("navigation.php");?>
+        <?php include("includes/navigation.php");?>
         <div class="container">
             <?php
             $name = $product["name"];
@@ -53,7 +53,6 @@ else{
             ?>
            
         </div>
-        <script src="components/jquery/dist/jquery.js"></script>
-        <script src="components/bootstrap/dist/js/bootstrap.js"></script>
+        <?php include("includes/scripts.php"); ?>
     </body>
 </html>

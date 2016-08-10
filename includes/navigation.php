@@ -7,7 +7,7 @@
       //if user is not logged in
       if(!$_SESSION["email"]){
         echo "<li><a href=\"register.php\">Register</a></li>";
-        echo "<li><a href=\"login.php\">Sign Up</a></li>";
+        echo "<li><a href=\"login.php\">Sign In</a></li>";
       }
       ?>
       <?php
@@ -17,6 +17,7 @@
         if($_SESSION["admin"]){
           echo "<li><a href=\"dashboard.php\">Dashboard</a></li>";
         }
+        echo "<li><a href=\"user-dashboard.php\">My Account</a></li>";
         echo "<li><a href=\"logout.php\">Logout</a></li>";
       }
       ?>

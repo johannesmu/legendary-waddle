@@ -1,6 +1,18 @@
 <?php
 include("includes/session.php");
 include("includes/dbconnection.php");
+//if user is not admin
+if(!$_SESSION["admin"]){
+  //if user is logged in
+  if($_SESSION["email"]){
+    header("location: user-dashboard.php");
+  }
+  //if user is not logged in redirect to login page
+  else{
+    header("location: login.php");
+  }
+  exit();
+}
 //get products to show
 $query = "SELECT * FROM products";
 $products = array();
@@ -49,7 +61,7 @@ if(count($_POST)>0){
   }
 }
 ?>
-<?doctype html>
+<!doctype html>
 <html>
 <?php include("includes/head.php");?>
 <body>
@@ -76,6 +88,10 @@ if(count($_POST)>0){
           <div class="tab-content">
             <!--Manage products-->
             <div role="tabpanel" class="tab-pane active" id="manageproducts">
+              <div class="col-md-3">
+                <h3>Add a new Product</h3>
+                <a class="btn btn-default" href="add_product.php">Add</a>
+              </div>
               <div class="col-md-8">
               <h3>Existing Products</h3>
                 <?php
@@ -111,50 +127,50 @@ if(count($_POST)>0){
               </div>
             </div>
             <!--Add Product-->
-            <div role="tabpanel" class="tab-pane" id="addproduct">
-              <h3>Add a new item</h3>
-                <form id="new-item" action="dashboard.php" method="POST" enctype="multipart/form-data">
-                  <div class="row">
-                    <div class="col-md-6">
-                      <div class="form-group">
-                        <label for="name">Item Name</label>
-                        <input id="name" name="name" class="form-control" type="text" placeholder="Item Name">
-                      </div>
-                      <div class="form-group">
-                        <label for="description">Item Description</label>
-                        <textarea id="description" name="description" class="form-control" placeholder="Item Description"></textarea>
-                      </div>
-                      <div class="form-group">
-                        <label for="quantity">Quantity in stock</label>
-                        <input id="quantity" name="quantity" class="form-control number" type="number" value="10">
-                      </div>
-                      <div class="form-group">
-                        <label for="category">Item Category</label>
-                        <select id="category" class="form-control" name="category">
-                          <?php
-                          foreach($categories as $cat){
-                            $id = $cat["category_id"];
-                            $name = $cat["name"];
-                            echo "<option value=\"$id\">$name</option>";
-                          }
-                          ?>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="form-group">
-                        <label for="image">
-                        Product Image
-                        </label>
-                        <input id="image" name="image" class="form-control" type="file">
-                      </div>
-                    </div>
+            <!--<div role="tabpanel" class="tab-pane" id="addproduct">-->
+            <!--  <h3>Add a new item</h3>-->
+            <!--    <form id="new-item" action="dashboard.php" method="POST" enctype="multipart/form-data">-->
+            <!--      <div class="row">-->
+            <!--        <div class="col-md-6">-->
+            <!--          <div class="form-group">-->
+            <!--            <label for="name">Item Name</label>-->
+            <!--            <input id="name" name="name" class="form-control" type="text" placeholder="Item Name">-->
+            <!--          </div>-->
+            <!--          <div class="form-group">-->
+            <!--            <label for="description">Item Description</label>-->
+            <!--            <textarea id="description" name="description" class="form-control" placeholder="Item Description"></textarea>-->
+            <!--          </div>-->
+            <!--          <div class="form-group">-->
+            <!--            <label for="quantity">Quantity in stock</label>-->
+            <!--            <input id="quantity" name="quantity" class="form-control number" type="number" value="10">-->
+            <!--          </div>-->
+            <!--          <div class="form-group">-->
+            <!--            <label for="category">Item Category</label>-->
+            <!--            <select id="category" class="form-control" name="category">-->
+            <!--              <?php-->
+            <!--              foreach($categories as $cat){-->
+            <!--                $id = $cat["category_id"];-->
+            <!--                $name = $cat["name"];-->
+            <!--                echo "<option value=\"$id\">$name</option>";-->
+            <!--              }-->
+            <!--              ?>-->
+            <!--            </select>-->
+            <!--          </div>-->
+            <!--        </div>-->
+            <!--        <div class="col-md-6">-->
+            <!--          <div class="form-group">-->
+            <!--            <label for="image">-->
+            <!--            Product Image-->
+            <!--            </label>-->
+            <!--            <input id="image" name="image" class="form-control" type="file">-->
+            <!--          </div>-->
+            <!--        </div>-->
                     
-                  </div>
-                  <button class="btn btn-default" type="submit" role="submit">Create Item</button>
-                </form>
+            <!--      </div>-->
+            <!--      <button class="btn btn-default" type="submit" role="submit">Create Item</button>-->
+            <!--    </form>-->
               
-            </div>
+            <!--</div>-->
             <!--Manage Users-->
             <div role="tabpanel" class="tab-pane" id="manageusers">
               <h4>Site Users</h4>
