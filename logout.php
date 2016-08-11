@@ -16,5 +16,11 @@ session_destroy();
             </div>
         </div>
         <?php include("includes/scripts.php");?>
+        <!--a javascript timer to show the home page after 3000ms-->
+        <script>
+            timer = setTimeout(function(){
+                window.location.href="index.php";
+            },3000);
+        </script>
     </body>
 </html>

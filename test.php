@@ -32,4 +32,7 @@ echo '<b>Path: </b> /usr/local/bin/convert<br>';
 exec("/usr/local/bin/convert -version", $out, $rcode); //Try to get ImageMagick "convert" program version number.
 echo "Version return code is $rcode <br>"; //Print the return code: 0 if OK, nonzero if error.
 echo alist($out); //Print the output of "convert -version";
+
+echo "Info";
+phpinfo();s
 ?>

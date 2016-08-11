@@ -3,7 +3,7 @@ include("includes/session.php");
 include("includes/dbconnection.php");
 //if user is not admin
 if(!$_SESSION["admin"]){
-  //if user is logged in
+  //if user is logged in redirect to user-dashboard
   if($_SESSION["email"]){
     header("location: user-dashboard.php");
   }
@@ -11,6 +11,7 @@ if(!$_SESSION["admin"]){
   else{
     header("location: login.php");
   }
+  //stop if the above conditions are not met
   exit();
 }
 //get products to show
@@ -70,15 +71,19 @@ if(count($_POST)>0){
       <div class="row">
         <div class="col-md-12">
           <ul class="nav nav-tabs" role="tablist">
+            <!--manage products-->
             <li role="presentation" class="active">
               <a href="#manageproducts" aria-controls="manage products" role="tab" data-toggle="tab">Manage Products</a>
             </li>
+            <!--manage users-->
             <li role="presentation">
               <a href="#manageusers" aria-controls="manage users" role="tab" data-toggle="tab">Manage Users</a>
             </li>
+            <!--manage categories-->
             <li role="presentation">
-              <a href="#statistics" aria-controls="statistics" role="tab" data-toggle="tab">Statistics</a>
+              <a href="#categories" aria-controls="manage categories" role="tab" data-toggle="tab">Manage Categories</a>
             </li>
+            <!--settings-->
             <li role="presentation">
               <a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">Settings</a>
             </li>
@@ -126,51 +131,6 @@ if(count($_POST)>0){
                 
               </div>
             </div>
-            <!--Add Product-->
-            <!--<div role="tabpanel" class="tab-pane" id="addproduct">-->
-            <!--  <h3>Add a new item</h3>-->
-            <!--    <form id="new-item" action="dashboard.php" method="POST" enctype="multipart/form-data">-->
-            <!--      <div class="row">-->
-            <!--        <div class="col-md-6">-->
-            <!--          <div class="form-group">-->
-            <!--            <label for="name">Item Name</label>-->
-            <!--            <input id="name" name="name" class="form-control" type="text" placeholder="Item Name">-->
-            <!--          </div>-->
-            <!--          <div class="form-group">-->
-            <!--            <label for="description">Item Description</label>-->
-            <!--            <textarea id="description" name="description" class="form-control" placeholder="Item Description"></textarea>-->
-            <!--          </div>-->
-            <!--          <div class="form-group">-->
-            <!--            <label for="quantity">Quantity in stock</label>-->
-            <!--            <input id="quantity" name="quantity" class="form-control number" type="number" value="10">-->
-            <!--          </div>-->
-            <!--          <div class="form-group">-->
-            <!--            <label for="category">Item Category</label>-->
-            <!--            <select id="category" class="form-control" name="category">-->
-            <!--              <?php-->
-            <!--              foreach($categories as $cat){-->
-            <!--                $id = $cat["category_id"];-->
-            <!--                $name = $cat["name"];-->
-            <!--                echo "<option value=\"$id\">$name</option>";-->
-            <!--              }-->
-            <!--              ?>-->
-            <!--            </select>-->
-            <!--          </div>-->
-            <!--        </div>-->
-            <!--        <div class="col-md-6">-->
-            <!--          <div class="form-group">-->
-            <!--            <label for="image">-->
-            <!--            Product Image-->
-            <!--            </label>-->
-            <!--            <input id="image" name="image" class="form-control" type="file">-->
-            <!--          </div>-->
-            <!--        </div>-->
-                    
-            <!--      </div>-->
-            <!--      <button class="btn btn-default" type="submit" role="submit">Create Item</button>-->
-            <!--    </form>-->
-              
-            <!--</div>-->
             <!--Manage Users-->
             <div role="tabpanel" class="tab-pane" id="manageusers">
               <h4>Site Users</h4>
@@ -202,8 +162,22 @@ if(count($_POST)>0){
               }
               ?>
             </div>
-            <!--Statistics-->
-            <div role="tabpanel" class="tab-pane" id="statistics">...</div>
+            <!--Manage Categories-->
+            <div role="tabpanel" class="tab-pane" id="categories">
+              <div class="row">
+                <?php
+                foreach($categories as $category){
+                  $catid = $category["id"];
+                  $catname = $category["name"];
+                  echo "<div class=\"col-md-12 panel\" data-id=\"$id\">
+                  <p>$name</p>
+                  <div>";
+                }
+                ?>
+              </div>
+            </div>
+            <!--Settings-->
+            <div role="tabpanel" class="tab-pane" id="settings">...</div>
           </div>
         </div>
         

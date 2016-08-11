@@ -6,9 +6,6 @@ if(count($_POST)>0){
   $email=$_POST["email"];
   $password=$_POST["password"];
   //sanitise variables, password should not be sanitised
-  //$email = filter_var($email,FILTER_SANTIZE_EMAIL);
-  //hash password
-  //$password = password_hash($password,PASSWORD_DEFAULT);
   $query = "SELECT * FROM users WHERE email='$email'";
   $result = $dbconnection->query($query);
   $userdata = $result->fetch_assoc();
@@ -20,6 +17,10 @@ if(count($_POST)>0){
     $_SESSION["email"]=$stored_email;
     if($userdata["admin"]==='1'){
       $_SESSION["admin"]=1;
+      header("location: dashboard.php");
+    }
+    else{
+      header("location: user-dashboard.php");
     }
   }
   else{

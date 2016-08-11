@@ -79,12 +79,12 @@ $email = $userdata["email"];
           <div class="form-group">
             <input type="hidden" name="id" value="<?php echo $id;?>">
             <input type="hidden" name="email" value="<?php echo $email;?>">
-            <p><?php echo "Current Email Address: $email";?></p>
-            <label for="email">New Email Address</label>
-            <input class="form-control" id="email" name="newemail" type="email">
+            
+            <label for="email">Change Email Address</label>
+            <input class="form-control" id="email" name="newemail" type="email" placeholder="<?php echo $email;?>">
           </div>
           <div class="form-group">
-            <label for="password">New Password</label>
+            <label for="password">Create A New Password</label>
             <input class="form-control" id="password" name="newpassword" type="password" placeholder="change password">
           </div>
           <div class="form-group">

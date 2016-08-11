@@ -1,9 +1,9 @@
 <?php
-include("session.php");
-include("dbconnection.php");
+include("includes/session.php");
+include("includes/dbconnection.php");
 //check for POST variables
-if(count($_POST)>0){
-    $search_query = filter_var($_POST["search"],FILTER_SANITIZE_STRING);
+if(count($_GET)>0){
+    $search_query = filter_var($_GET["search"],FILTER_SANITIZE_STRING);
     $dbquery = "SELECT * FROM products 
     WHERE name LIKE '%$search_query%'
     OR description LIKE '%$search_query%'";
@@ -18,9 +18,9 @@ if(count($_POST)>0){
 ?>
 <!doctype html>
 <html>
-   <?php include("head.php");?>
+   <?php include("includes/head.php");?>
    <body>
-       <?php include("navigation.php");?>
+       <?php include("includes/navigation.php");?>
        <div class="container">
            <div class="row">
                <div class="col-md-12">
@@ -47,8 +47,14 @@ if(count($_POST)>0){
                        </div>";
                    }
                }
+               else{
+                   echo "<div class=\"col-md-12 alert\">
+                   <p>Your search for $search_query returned no result</p>
+                   </div>";
+               }
                ?>
            </div>
        </div>
+       <?php include("includes/scripts.php");?>
    </body>
 </html>

@@ -22,7 +22,7 @@
       }
       ?>
     </ul>
-    <form class="navbar-form navbar-right" action="search.php" method="post">
+    <form class="navbar-form navbar-right" action="search.php" method="get">
       <div class="form-group">
         <input type="text" name="search" class="form-control" placeholder="Search">
         <button type="submit" role="search" class="btn btn-default">
