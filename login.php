@@ -6,7 +6,7 @@ if(count($_POST)>0){
   $email=$_POST["email"];
   $password=$_POST["password"];
   //sanitise variables, password should not be sanitised
-  $query = "SELECT * FROM users WHERE email='$email'";
+  $query = "SELECT * FROM users WHERE email='$email' AND active='1'";
   $result = $dbconnection->query($query);
   $userdata = $result->fetch_assoc();
   if(password_verify($password,$userdata["password"])){
@@ -15,27 +15,42 @@ if(count($_POST)>0){
     $loggedinuserid = $userdata["id"];
     //set success to true
     $success=true;
-    //----------assign cart items to the logged in user
+    //set last login time for user
+    //generateDateTime function is in session.php file
+    $lastlogin = generateDateTime();
+    $logintimequery = "UPDATE users SET lastlogin='$lastlogin' WHERE id='$loggedinuserid'";
+    $dbconnection->query($logintimequery);
+    
+    //----------assign cart items and wishlist to the logged in user
+    //the id that the user has before logging in--from session id
+    $currentuserid = $_SESSION["id"];
+    //find cart items in the database
+    $cartquery = "SELECT productid FROM cart WHERE userid='$currentuserid'";
+    $cartresult = $dbconnection->query($cartquery);
     //if there are items in the cart
-    if(count($_SESSION["cart"])>0){
-      //the id that the user has before logging in--from session id
-      $currentuserid = $_SESSION["id"];
-      
+    if($cartresult->num_rows > 0){
       //update all cart items that the user added before logging in to the current user
       $query="UPDATE cart SET userid='$loggedinuserid' WHERE userid='$currentuserid'";
       $dbconnection->query($query);
     }
-    //if there is no item in the cart
-    else{
-      //check if there are any items in the user's cart in database
-      $query = "SELECT * FROM cart WHERE userid='$loggedinuserid'";
-      $result=$dbconnection->query($query);
-      if($result->num_rows > 0){
-        while($row = $result->fetch_assoc()){
-          array_push($_SESSION["cart"],$row);
-        }
-      }
+    $wishquery = "SELECT productid FROM wishlist WHERE userid='$currentuserid'";
+    $wishresult = $dbconnection->query($wishquery);
+    if($wishresult->num_rows > 0){
+      //update all wish list items that the user has added and assign to current user id
+      $query="UPDATE wishlist SET userid='$loggedinuserid' WHERE userid='$currentuserid'";
+      $dbconnection->query($query);
     }
+    //if there is no item in the cart
+    // else{
+    //   //check if there are any items in the user's cart in database
+    //   $query = "SELECT * FROM cart WHERE userid='$loggedinuserid'";
+    //   $result=$dbconnection->query($query);
+    //   if($result->num_rows > 0){
+    //     while($row = $result->fetch_assoc()){
+    //       array_push($_SESSION["cart"],$row);
+    //     }
+    //   }
+    // }
     //regenerate user id after logging in to prevent session fixation attack
     //see https://goo.gl/a6q56W
     session_regenerate_id();
@@ -43,17 +58,17 @@ if(count($_POST)>0){
     $_SESSION["email"]=$stored_email;
     $_SESSION["id"]=$userdata["id"];
     
-    
+    //if user is an admin
     if($userdata["admin"]==='1'){
       $_SESSION["admin"]=1;
       header("location: dashboard.php");
     }
+    //if user is not an admin
     else{
       header("location: user-dashboard.php");
     }
   }
   else{
-    //echo "failure";
     $success=false;
   }
 }
@@ -83,12 +98,19 @@ if(count($_POST)>0){
               echo "<div class=\"alert alert-success\">Welcome</div>";
             }
             elseif($success===false){
-              echo "<div class=\"alert alert-danger\">Email or password does not match our records</div>";
+              echo "<div class=\"alert alert-danger\">Authentication Error</div>";
             }
             ?>
           </form>
         </div>
       </div>
+      <div class="row">
+          <div class="col-md-6 col-md-offset-3">
+            <p class="text-center">
+              Don't have an account? <a href="register.php">Sign up</a> here
+            </p>
+          </div>
+        </div>
     </div>
     <?php include("includes/scripts.php");?>
 </body>

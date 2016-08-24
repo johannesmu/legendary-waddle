@@ -16,8 +16,9 @@ if($_POST["submit"]=="delete"){
     //update session cart
     $cartcount = count($_SESSION["cart"]);
     for($i=0;$i<$cartcount;$i++){
-      $cartitem = $_SESSION["cart"][i]["productid"];
-      if($cartitem==$productid){
+      $cartitem = $_SESSION["cart"][$i]["productid"];
+      if($_SESSION["cart"][$i]["productid"]==$productid){
+        $_SESSION["found"] = true;
         array_splice($_SESSION["cart"][$i],1);
       }
     }
@@ -31,13 +32,21 @@ if($_POST["submit"]=="delete"){
 }
 //----------update cart item
 //if user has clicked on update button
-if(isset($_POST["update"])){
+if($_POST["submit"]=="update"){
   //sanitise the id
   $cartitemid = filter_var($_POST["id"],FILTER_SANITIZE_NUMBER_INT);
   //sanitise the quantity
-  $quantity = filter_var($_POST["quantity"],FILTER_SANITIZE_NUMBER_INT);
-  $query = "UPDATE cart SET quantity='$quantity' WHERE id='$id'";
+  $newquantity = filter_var($_POST["quantity"],FILTER_SANITIZE_NUMBER_INT);
+  //sanitise the product id
+  $productid = filter_var($_POST["productid"],FILTER_SANITIZE_NUMBER_INT);
+  $query = "UPDATE cart SET quantity='$newquantity' WHERE id='$cartitemid'";
   if($dbconnection->query($query)){
+    //update the session cart
+    // foreach($_SESSION["cart"] as &$cartitem){
+    //   if($cartitem["productid"]==$productid){
+    //     $cartitem["quantity"]=$newquantity;
+    //   }
+    // }
     $success = true;
     $message = "Item updated";
   }
@@ -120,7 +129,7 @@ if($result->num_rows > 0){
               <input type=\"hidden\" name=\"id\" value=\"$id\">
               <input type=\"hidden\" name=\"productid\" value=\"$productid\">
               <label for=\"item$id\">Quantity</label>
-              <input type=\"number\" id=\"item$id\" class=\"form-control quantity\" value=\"$quantity\">
+              <input type=\"number\" id=\"item$id\" name=\"quantity\" class=\"form-control quantity\" value=\"$quantity\">
               <button class=\"btn btn-default\" name=\"submit\" value=\"update\" type=\"submit\">Update</button>
               <button class=\"btn btn-default\" name=\"submit\" value=\"delete\" type=\"submit\">&times;</button>
             </form>

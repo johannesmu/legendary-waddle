@@ -1,6 +1,7 @@
 <?php
 session_start();
 //if cart does not exist, create cart session variable
+//the session cart is redundant, will be removed
 if(!$_SESSION["cart"]){
     $_SESSION["cart"]=array();
 }

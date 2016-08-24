@@ -1,5 +1,6 @@
 <?php
-print_r($_SESSION);
+//uncomment for session debugging purposes
+//print_r($_SESSION);
 ?>
 <nav class="navbar navbar-default">
   <div class="container-fluid">
@@ -41,35 +42,47 @@ print_r($_SESSION);
       if($_SESSION["email"]){
         echo "<p>Hello ".$_SESSION["email"]."</p>";
       }
+      else{
+        echo "<p>Hello Visitor, why not <a href=\"register.php\">join</a> our site?</p>";
+      }
       ?>
     </div>
       <?php
+      //get user id
+      $userid = $_SESSION["id"];
+      //count cart items in database
+      $cartquery = "SELECT productid,quantity FROM cart WHERE userid='$userid'";
+      $result = $dbconnection->query($cartquery);
       //count items in shopping cart
-      //get the user id
-      $id=$_SESSION["id"];
-      //if there are items in the cart
       $carttotal = 0;
-      if(count($_SESSION["cart"])>0){
-        foreach($_SESSION["cart"] as $item){
-          $total+=$item["quantity"];
+      //if there are items in the cart
+      if($result->num_rows > 0){
+        while($row = $result->fetch_assoc()){
+          $carttotal+=$row["quantity"];
         }
       }
       //count items in the wishlist
       $wishtotal = 0;
-      if(count($_SESSION["wishlist"]) > 0){
-        foreach($_SESSION["wishlist"] as $wish){
+      $wishquery = "SELECT productid FROM wishlist WHERE userid='$userid'";
+      $result = $dbconnection->query($wishquery);
+      if($result->num_rows > 0){
+        while($row = $result->fetch_assoc()){
           $wishtotal++;
         }
       }
       ?>
     <div class="col-md-6 text-right">
-      <a href="shopping-cart.php" class="shopping-cart shop-buttons">
+      <a href="shopping-cart.php" class="btn btn-default shopping-cart shop-buttons">
         <span class="glyphicon glyphicon-shopping-cart"></span>
-        <span class="badge cart-total"><?php echo $total;?></span>
+        <!--keep the line below as a single line to allow empty badge when there is no-->
+        <!--item in the cart-->
+        <span class="badge cart-total"><?php if($carttotal>0){echo $carttotal;}?></span>
       </a>
-      <a href="wishlist.php" class="wishlist shop-buttons">
+      <a href="wishlist.php" class="btn btn-default wishlist shop-buttons">
         <span class="glyphicon glyphicon-star"></span>
-        <span class="badge wish-total"><?php if($wishtotal){echo $wishtotal;}?></span>
+        <!--keep the line below as a single line to allow empty badge when there is no-->
+        <!--item in the cart-->
+        <span class="badge wish-total"><?php if($wishtotal>0){echo $wishtotal;}?></span>
       </a>
       
     </div>

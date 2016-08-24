@@ -46,8 +46,8 @@
 .shop-buttons{
     text-decoration:none;
     color:inherit;
-    padding:0 5px;
-    font-size:18px;
+    /*padding:0 5px;*/
+    /*font-size:18px;*/
 }
 .shop-buttons:hover{
     text-decoration: none;

@@ -65,6 +65,27 @@ if($result->num_rows > 0){
 }
 $id = $userdata["id"];
 $email = $userdata["email"];
+echo $id;
+//get users wishlist
+$query = "SELECT 
+wishlist.id as wishid,
+products.id as productid,
+products.name as name,
+products.price as price,
+products.image as image 
+FROM wishlist 
+INNER JOIN products 
+ON wishlist.productid=products.id
+WHERE wishlist.userid='$id'";
+
+$wisharray = array();
+
+$wishresult = $dbconnection->query($query);
+if($wishresult->num_rows > 0){
+  while($row = $wishresult->fetch_assoc()){
+    array_push($wisharray,$row);
+  }
+}
 
 ?>
 <!doctype html>
@@ -75,7 +96,7 @@ $email = $userdata["email"];
   <div class="container">
     <div class="row">
       <div class="col-md-4">
-        <h2>Update Your Details</h2>
+        <h4>Update Your Details</h4>
         <form id="user-details" method="post" action="user-dashboard.php">
           <div class="form-group">
             <input type="hidden" name="id" value="<?php echo $id;?>">
@@ -112,6 +133,36 @@ $email = $userdata["email"];
           elseif(count($errors)==0 && $submitted==true && $success == false){
             echo "<div class=\"alert alert-danger\">Update Failed</div>";
           }
+        ?>
+      </div>
+      <div class="col-md-8">
+        <h4>Your Favourite Items</h4>
+        <!--list users wishlist here-->
+        <?php
+        $count=0;
+        foreach($wisharray as $wish){
+          $count++;
+          $name = $wish["name"];
+          $productid = $wish["productid"];
+          $wishid = $wish["wishid"];
+          $price = $wish["price"];
+          $image = $wish["image"]; 
+          if($count==1){
+            echo "<div class=\"row\">";
+          }
+          echo "<div class=\"col-md-4\">
+                  <h3>$name</h3>
+                  <a href='detail.php?id=$productid'>
+                    <img class='product-image' src='images/$image'>
+                  </a>
+                  <p class='price product-price'>$price</p>
+                  <a class='btn btn-default' href='detail.php?id=$productid'>detail</a>
+                </div>";
+          if($count>=3){
+            echo "</div>";
+            $count = 0;
+          }
+        }
         ?>
       </div>
     </div>

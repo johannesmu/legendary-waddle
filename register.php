@@ -8,7 +8,7 @@ if(count($_POST)>0){
   //sanitise variables, password should not be sanitised
   $email = filter_var($email,FILTER_SANITIZE_EMAIL);
   //check if email exists in database
-  $query = "SELECT * FROM users WHERE email='$email'";
+  $query = "SELECT email FROM users WHERE email='$email'";
   $result = $dbconnection->query($query);
   if($result->num_rows!=0){
     echo "email already used";
@@ -16,9 +16,24 @@ if(count($_POST)>0){
   else{
     //hash password
     $password = password_hash($password,PASSWORD_DEFAULT);
-    $query = "INSERT INTO users (email,password) VALUES ('$email','$password')";
+    //generate password reset string
+    $reset_string = generateToken();
+    $time = generateDateTime();
+    $query = "INSERT INTO users (email,password,password_reset,active,lastlogin) 
+    VALUES ('$email','$password','$reset_string','1','$time')";
+    
     if($dbconnection->query($query)){
-      //echo "success";
+      //account creation is successful, so log user in automatically
+      //get the user data from database
+      $query = "SELECT id,email,admin FROM users WHERE email='$email'";
+      $result = $dbconnection->query($query);
+      $userdata = $result->fetch_assoc();
+      $_SESSION["id"] = $userdata["id"];
+      $_SESSION["email"] = $userdata["email"];
+      //if user is an admin
+      if($userdata["admin"]==1){
+        $_SESSION["admin"]=1;
+      }
       $success=true;
     }
     else{
@@ -47,7 +62,9 @@ if(count($_POST)>0){
               <label for="password">Password</label>
               <input type="password" class="form-control" name="password" id="password" placeholder="password">
             </div>
-            <button type="submit" role="submit" class="btn btn-default">Register</button>
+            <button type="submit" name="submit" role="submit" class="btn btn-default">
+              Register
+            </button>
           </form>
           <?php
           if($success==true){
@@ -57,6 +74,13 @@ if(count($_POST)>0){
             </div>";
           }
           ?>
+        </div>
+        <div class="row">
+          <div class="col-md-6 col-md-offset-3">
+            <p class="text-center">
+              Already have an account? <a href="login.php">Sign in</a> here
+            </p>
+          </div>
         </div>
       </div>
     </div>
