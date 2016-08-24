@@ -4,6 +4,7 @@ include("includes/dbconnection.php");
 //if the user is not logged in, redirect to login page
 if(!$_SESSION["email"]){
   header("location:login.php");
+  //make sure we exit to stop the script from processing any further
   exit();
 }
 //receive update data

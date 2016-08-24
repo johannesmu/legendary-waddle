@@ -12,9 +12,38 @@ if(count($_POST)>0){
   if(password_verify($password,$userdata["password"])){
     //login successful
     $stored_email = $userdata["email"];
-    //echo "success"." hello $stored_email";
+    $loggedinuserid = $userdata["id"];
+    //set success to true
     $success=true;
+    //----------assign cart items to the logged in user
+    //if there are items in the cart
+    if(count($_SESSION["cart"])>0){
+      //the id that the user has before logging in--from session id
+      $currentuserid = $_SESSION["id"];
+      
+      //update all cart items that the user added before logging in to the current user
+      $query="UPDATE cart SET userid='$loggedinuserid' WHERE userid='$currentuserid'";
+      $dbconnection->query($query);
+    }
+    //if there is no item in the cart
+    else{
+      //check if there are any items in the user's cart in database
+      $query = "SELECT * FROM cart WHERE userid='$loggedinuserid'";
+      $result=$dbconnection->query($query);
+      if($result->num_rows > 0){
+        while($row = $result->fetch_assoc()){
+          array_push($_SESSION["cart"],$row);
+        }
+      }
+    }
+    //regenerate user id after logging in to prevent session fixation attack
+    //see https://goo.gl/a6q56W
+    session_regenerate_id();
+    //create session variables using user data from database
     $_SESSION["email"]=$stored_email;
+    $_SESSION["id"]=$userdata["id"];
+    
+    
     if($userdata["admin"]==='1'){
       $_SESSION["admin"]=1;
       header("location: dashboard.php");

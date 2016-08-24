@@ -1,7 +1,9 @@
 <?php
+//include session
 include("includes/session.php");
+//include database connection
 include ("includes/dbconnection.php");
-//get products
+//---------get products
 //product query
 $query = "SELECT * FROM products";
 //if there is filter, append filter to query
@@ -52,22 +54,32 @@ if($catresult->num_rows>0){
                     </form>
                 </div>
                 <div class="col-md-10">
-                    <div class="row">
-                        <?php
-                        foreach($products as $product){
-                            $name = $product["name"];
-                            $price = $product["price"];
-                            $id = $product["id"];
-                            $image = $product["image"];
-                            echo "<div class=\"col-md-4\">
-                            <h3>$name</h3>
-                            <img class='product-image' src='images/$image'>
-                            <p class='price'>$price</p>
-                            <a class='btn btn-default' href='detail.php?id=$id'>detail</a>
-                            </div>";
-                        }
-                        ?>
-                    </div>
+                    <?php
+                    //render products with row
+                    $count = 0;
+                    foreach($products as $product){
+                    $name = $product["name"];
+                    $price = $product["price"];
+                    $id = $product["id"];
+                    $image = $product["image"];
+                    $count++;
+                    if($count==1){
+                        echo "<div class=\"row product-row\">";
+                    }
+                        echo "<div class=\"col-md-4\">
+                        <h3>$name</h3>
+                        <a href='detail.php?id=$id'>
+                        <img class='product-image' src='images/$image'>
+                        </a>
+                        <p class='price product-price'>$price</p>
+                        <a class='btn btn-default' href='detail.php?id=$id'>detail</a>
+                        </div>";
+                    if($count>=3){
+                        echo "</div>";
+                        $count = 0;
+                    }
+                    }
+                    ?>
                 </div>
             </div>
         </div>

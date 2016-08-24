@@ -4,10 +4,11 @@ include("includes/dbconnection.php");
 //check if user is admin
 if(!$_SESSION["admin"]){
   echo "admin required";
+  header("location: login.php");
   exit();
 }
 //image directory
-$image_dir = "images/";
+$image_dir = "/images/";
 //get categories
 $catquery = "SELECT category_id,name FROM categories";
 $result = $dbconnection->query($catquery);
@@ -19,52 +20,21 @@ if($result->num_rows > 0){
 }
 
 if(count($_POST)>0){
+  //remove illegal characters from title
   $title = filter_var($_POST["title"],FILTER_SANITIZE_STRING);
+  //remove illegal characters from description
   $description = filter_var($_POST["description"],FILTER_SANITIZE_STRING);
-  $quantity = filter_var($_POST["quantity"],FILTER_SANITIZE_STRING);
+  //remove illegal characters from quantity
+  $quantity = filter_var($_POST["quantity"],FILTER_SANITIZE_NUMBER_INT);
+  //remove illegal characters from category
   $productcategory = filter_var($_POST["category"],FILTER_SANITIZE_NUMBER_INT);
-  $price = filter_var($_POST["price"],FILTER_SANITIZE_NUMBER_INT);
-  $imagefile = filter_var($_FILES["image"]["name"],FILTER_SANITIZE_STRING);
+  //remove illegal characters from price
+  $price = filter_var($_POST["price"],FILTER_SANITIZE_NUMBER_FLOAT);
+  $imagefile = $_FILES["image"]["name"];
+  //remove spaces from file name
   $imagefile = str_replace(' ','',$imagefile);
   //check the image upload
-  if (isset($_FILES["image"])) {
-    $tempFile = $_FILES["image"]["tmp_name"];
-    echo "temp=$tempFile<br>$imagefile<br>";
-    print_r($_FILES["image"]["error"]);
-    //$fileName = // determine secure name for uploaded file
-    $fileName = uniqid().$imagefile;
-    list($width, $height) = getimagesize($tempFile);
-    // check if the file is really an image
-    if ($width == null && $height == null) {
-        // header("Location: index.php");
-        // return;
-        echo "not an image";
-        exit();
-    }
-    // resize if necessary
-    if ($width >= 400 && $height >= 400) {
-        $image = new Imagick($tempFile);
-        $image->thumbnailImage(400, 400);
-        $image->writeImage($fileName);
-    }
-    else {
-        $fileName = $image_dir.$fileName;
-        move_uploaded_file($tempFile, $fileName);
-        //add product to database
-        $query = "INSERT INTO products (name,description,price,stockqty,categoryid,image) 
-        VALUES ('$name','$description','$stockqty','$price','$productcategory','$imagefile')";
-        if($dbconnection->query($query)){
-          $success = true;
-        }
-        else{
-          echo "product creation failed";
-        }
-    }
-  }
-  else{
-    echo "please add a product image";
-    exit();
-  }
+  
 }
 ?>
 <?doctype html>
@@ -111,17 +81,60 @@ if(count($_POST)>0){
                     ?>
                   </select>
                 </div>
-                <div class="form-group">
-                  <!--set maximum file size-->
-                  <!--<input type="hidden" name="MAX_FILE_SIZE" value="5242880">-->
-                  <label for="image">
-                  Product Image
-                  </label>
-                  <input id="image" name="image" class="form-control" type="file">
-                </div>
-                <div class="text-right">
-                  <button class="btn btn-default" type="submit" name="submit" role="submit">Create Item</button>
-                </div>
+              </div>
+            </div>
+            <div class="row">
+              <h4 class="col-md-12">Product Image</h4>
+              <!--use a hidden input to send value to server whether image will be uploaded or selected from image already-->
+              <!--on the server-- defaults to "1" which means image will be uploaded-->
+              <input type="hidden" name="imageupload" value="1">
+              <div class="col-md-12">
+                <ul class="nav nav-tabs" role="tablist">
+                  <li role="presentation" class="active">
+                    <a href="#upload" aria-controls="upload an image" role="tab" data-toggle="tab">Upload an image</a>
+                  </li>
+                  <li role="presentation">
+                    <a href="#server" aria-controls="profile" role="tab" data-toggle="tab">Select an image from server</a>
+                  </li>
+                </ul>
+                <div class="tab-content">
+                  <div role="tabpanel" class="tab-pane active" id="upload">
+                    <div class="form-group">
+                      <!--set maximum file size-->
+                      <!--<input type="hidden" name="MAX_FILE_SIZE" value="5242880">-->
+                      <label for="image">
+                      Product Image
+                      </label>
+                      <input id="image" name="image" class="form-control" type="file">
+                    </div>
+                  </div>
+                  <div role="tabpanel" class="tab-pane" id="server">
+                    <div class="form-group">
+                      <label for="selected-server-image">Selected Image</label>
+                      <input class="form-control" name="selected-image" id="selected-server-image" readonly type="text">
+                    </div>
+                    <div class="col-md-12 server-gallery-container">
+                      <div class="server-gallery">
+                        <?php
+                        $image_dir = "images";
+                        $files = scandir("images");
+                        foreach($files as $file){
+                          if(is_dir($file)==false){
+                            echo "<a href=\"#\" data-image=\"$file\">";
+                            echo "<img class=\"server-image\" data-image=\"$file\" src=\"$image_dir"."/".$file."\">";
+                            echo "</a>";
+                          }
+                        }
+                        ?>
+                      </div>
+                    </div>
+                  </div>
+              </div>
+              </div> 
+            </div>
+            <div class="row">
+              <div class="col-md-12 text-right">
+                <button class="btn btn-default" type="submit" name="submit" role="submit">Create Item</button>
               </div>
             </div>
           </form>
@@ -135,5 +148,21 @@ if(count($_POST)>0){
     </div>
   </div>
   <?php include("includes/scripts.php");?>
+  <script>
+    $(document).ready(function(){
+      $(".server-gallery").click(function(e){
+        //stop click from scrolling the page
+        e.preventDefault();
+        //get the image name from the data-image value on the images
+        var image = $(e.target).data("image");
+        //remove highlight from previously selected image
+        $(e.target).parents(".server-gallery").find("img").removeClass("server-image-selected");
+        //highlight the image that has been selected
+        $(e.target).addClass("server-image-selected");
+        //show the image name to the user
+        $("#selected-server-image").val(image);
+      });
+    });
+  </script>
 </body>
 </html>

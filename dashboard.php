@@ -43,14 +43,14 @@ if($userresult->num_rows > 0){
 }
 //handle the file upload
 //if there is post data sent to this page
-if(count($_POST)>0){
+if(isset($_POST["submit"])){
   //get all data posted
   $name = $_POST["name"];
   $description = $_POST["description"];
   $quantity = $_POST["quantity"];
   $category = $_POST["category"];
   $imagefile = $_FILES["image"]["name"];
-  var_dump($_FILES["image"]);
+  print_r($_FILES);
   if ($_FILES['image']['size'] > 5242880) {
     echo "file too large";
   }
@@ -169,8 +169,8 @@ if(count($_POST)>0){
                 foreach($categories as $category){
                   $catid = $category["id"];
                   $catname = $category["name"];
-                  echo "<div class=\"col-md-12 panel\" data-id=\"$id\">
-                  <p>$name</p>
+                  echo "<div class='col-md-12'>
+                  <p>$catname</p>
                   <div>";
                 }
                 ?>
