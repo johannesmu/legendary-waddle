@@ -77,7 +77,7 @@ if(count($_POST)>0){
         </div>
         <div class="row">
           <div class="col-md-6 col-md-offset-3">
-            <p class="text-center">
+            <p>
               Already have an account? <a href="login.php">Sign in</a> here
             </p>
           </div>

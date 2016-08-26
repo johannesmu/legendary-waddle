@@ -39,7 +39,14 @@ if($_POST["submit"]=="update"){
   $newquantity = filter_var($_POST["quantity"],FILTER_SANITIZE_NUMBER_INT);
   //sanitise the product id
   $productid = filter_var($_POST["productid"],FILTER_SANITIZE_NUMBER_INT);
-  $query = "UPDATE cart SET quantity='$newquantity' WHERE id='$cartitemid'";
+  if($newquantity>0){
+    //if quantity is larger than 0
+    $query = "UPDATE cart SET quantity='$newquantity' WHERE id='$cartitemid'";
+  }
+  elseif($newquantity==0){
+    //if quantity is 0 remove item from cart
+    $query = "DELETE FROM cart WHERE id='$cartitemid'";
+  }
   if($dbconnection->query($query)){
     //update the session cart
     // foreach($_SESSION["cart"] as &$cartitem){
@@ -48,7 +55,7 @@ if($_POST["submit"]=="update"){
     //   }
     // }
     $success = true;
-    $message = "Item updated";
+    $message = "Cart updated";
   }
   else{
     $success = false;
@@ -106,8 +113,8 @@ if($result->num_rows > 0){
         $id = $cartitem["id"];
         $name = $cartitem["name"];
         $price = $cartitem["price"];
-        $totalprice += $price;
         $quantity = $cartitem["quantity"];
+        $totalprice += $price*$quantity;
         $totalitems += $quantity;
         $productid = $cartitem["productid"];
         $image = $cartitem["image"];

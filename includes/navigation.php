@@ -43,7 +43,7 @@
         echo "<p>Hello ".$_SESSION["email"]."</p>";
       }
       else{
-        echo "<p>Hello Visitor, why not <a href=\"register.php\">join</a> our site?</p>";
+        //echo "<p>Hello Visitor, why not <a href=\"register.php\">join</a> our site?</p>";
       }
       ?>
     </div>

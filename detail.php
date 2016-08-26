@@ -71,14 +71,14 @@ else{
             if($_GET["success"]==true){
               $class="alert-success";
               $message="Item added";
-              $showalert="true";
+              $showalert=true;
             }
             elseif($_GET["success"]===false){
               $class="alert-warning";
               $message="Item cannot be added, due to an error";
-              $showalert="true";
+              $showalert=true;
             }
-            if($showalert){
+            if($showalert==true){
             echo 
             "<div class=\"site-alert alert $class alert-dismissible text-center\" role=\"alert\">
               <button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\">

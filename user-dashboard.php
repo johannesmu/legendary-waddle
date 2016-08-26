@@ -65,7 +65,7 @@ if($result->num_rows > 0){
 }
 $id = $userdata["id"];
 $email = $userdata["email"];
-echo $id;
+
 //get users wishlist
 $query = "SELECT 
 wishlist.id as wishid,
@@ -137,6 +137,11 @@ if($wishresult->num_rows > 0){
       </div>
       <div class="col-md-8">
         <h4>Your Favourite Items</h4>
+        <div class="btn-group">
+          <a href="wishlist.php" class="btn btn-default">Manage your favourites</a>
+          <a href="shopping-cart.php" class="btn btn-default">Manage your cart</a>
+        </div>
+        
         <!--list users wishlist here-->
         <?php
         $count=0;
@@ -150,15 +155,15 @@ if($wishresult->num_rows > 0){
           if($count==1){
             echo "<div class=\"row\">";
           }
-          echo "<div class=\"col-md-4\">
+          echo "<div class=\"col-md-3\">
                   <h3>$name</h3>
                   <a href='detail.php?id=$productid'>
-                    <img class='product-image' src='images/$image'>
+                    <img class='img-responsive product-image' src='images/$image'>
                   </a>
                   <p class='price product-price'>$price</p>
                   <a class='btn btn-default' href='detail.php?id=$productid'>detail</a>
                 </div>";
-          if($count>=3){
+          if($count>=4){
             echo "</div>";
             $count = 0;
           }

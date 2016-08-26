@@ -73,6 +73,7 @@ if($_POST["submit"]=="cart"){
         $success=false;
       }
     }
+    echo $success;
     $url ="$redirect"."&success=$success";
     // redirect back to originating page
     header("location:$url");

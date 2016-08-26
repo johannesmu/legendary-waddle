@@ -39,18 +39,19 @@ if(count($_POST)>0){
       //update all wish list items that the user has added and assign to current user id
       $query="UPDATE wishlist SET userid='$loggedinuserid' WHERE userid='$currentuserid'";
       $dbconnection->query($query);
+      //merge duplicate products, if found
+      $wisharray = array();
+      $query = "SELECT * FROM wishlist WHERE userid='$currentuserid'";
+      $records = $dbconnection->query($query);
+      if($records->num_rows > 0){
+        //add the wishlist items to array
+        while($row = $records->fetch_assoc()){
+          array_push($wisharray,$row);
+        }
+        
+      }
     }
-    //if there is no item in the cart
-    // else{
-    //   //check if there are any items in the user's cart in database
-    //   $query = "SELECT * FROM cart WHERE userid='$loggedinuserid'";
-    //   $result=$dbconnection->query($query);
-    //   if($result->num_rows > 0){
-    //     while($row = $result->fetch_assoc()){
-    //       array_push($_SESSION["cart"],$row);
-    //     }
-    //   }
-    // }
+    
     //regenerate user id after logging in to prevent session fixation attack
     //see https://goo.gl/a6q56W
     session_regenerate_id();
@@ -61,10 +62,12 @@ if(count($_POST)>0){
     //if user is an admin
     if($userdata["admin"]==='1'){
       $_SESSION["admin"]=1;
+      //redirect to admin dashboard
       header("location: dashboard.php");
     }
     //if user is not an admin
     else{
+      //redirect to user dashboard
       header("location: user-dashboard.php");
     }
   }
@@ -105,12 +108,19 @@ if(count($_POST)>0){
         </div>
       </div>
       <div class="row">
-          <div class="col-md-6 col-md-offset-3">
-            <p class="text-center">
-              Don't have an account? <a href="register.php">Sign up</a> here
-            </p>
-          </div>
+        <div class="col-md-6 col-md-offset-3">
+          <p>
+            Don't have an account? <a href="register.php">Sign up</a> here
+          </p>
         </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+          <p>
+            Forgot your password? <a href="password-reset.php">Reset your password</a> here
+          </p>
+        </div>
+      </div>
     </div>
     <?php include("includes/scripts.php");?>
 </body>

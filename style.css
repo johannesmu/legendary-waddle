@@ -1,3 +1,7 @@
+.product .badge{
+    margin-left:5px;
+    background-color:#aced68;
+}
 .product-image{
     width:100%;
 }
@@ -11,6 +15,9 @@
     font-size:18px;
     padding:5px;
     padding-left:0;
+}
+.product .badge{
+    margin-left:5px;
 }
 .product-description .price{
     font-size:150%;
