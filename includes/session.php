@@ -20,4 +20,5 @@ function generateToken(){
     $token = bin2hex($seed);
     return $token;
 }
+print_r($_SESSION);
 ?>

@@ -18,8 +18,9 @@ if($_POST["submit"]=="delete"){
     for($i=0;$i<$cartcount;$i++){
       $cartitem = $_SESSION["cart"][$i]["productid"];
       if($_SESSION["cart"][$i]["productid"]==$productid){
-        $_SESSION["found"] = true;
-        array_splice($_SESSION["cart"][$i],1);
+        //$_SESSION["found"] = true;
+        //array_splice($_SESSION["cart"][$i],1);
+        unset($_SESSION["cart"][$i]);
       }
     }
     $success = true;
@@ -48,12 +49,12 @@ if($_POST["submit"]=="update"){
     $query = "DELETE FROM cart WHERE id='$cartitemid'";
   }
   if($dbconnection->query($query)){
-    //update the session cart
-    // foreach($_SESSION["cart"] as &$cartitem){
-    //   if($cartitem["productid"]==$productid){
-    //     $cartitem["quantity"]=$newquantity;
-    //   }
-    // }
+    // update the session cart
+    foreach($_SESSION["cart"] as &$cartitem){
+      if($cartitem["productid"]==$productid){
+        $cartitem["quantity"]=$newquantity;
+      }
+    }
     $success = true;
     $message = "Cart updated";
   }
@@ -68,10 +69,12 @@ if($_POST["submit"]=="update"){
 $cartarray = array();
 //get cart contents from the database by joining products and cart tables
 //so we can get images and description
+//if there are multiple of the same product in the database, we combine the
+//quantity using SUM and GROUP BY productid
 $query = "SELECT 
           cart.id AS id,
           cart.productid AS productid,
-          cart.quantity AS quantity,
+          SUM(cart.quantity) AS quantity,
           products.image AS image,
           products.name AS name,
           products.description AS description,
@@ -80,7 +83,8 @@ $query = "SELECT
           INNER JOIN products 
           ON products.id = cart.productid
           WHERE cart.userid = '$userid'
-          AND cart.status='0'";
+          AND cart.status='0'
+          GROUP BY cart.productid";
 $result = $dbconnection->query($query);
 if($result->num_rows > 0){
   while($row = $result->fetch_assoc()){

@@ -5,7 +5,8 @@ include("includes/session.php");
 include ("includes/dbconnection.php");
 //get user id from session
 $userid = $_SESSION["id"];
-//---------get shopping cart products
+//---------get shopping cart products from database
+//this is to find out which items are already in the cart
 $cartarray = array();
 $cartquery = "SELECT productid FROM cart WHERE userid='$userid'";
 $cartresult = $dbconnection->query($cartquery);
@@ -25,37 +26,76 @@ if($wishresult->num_rows>0){
   }
 }
 $wishlength = count($wisharray);
+
+
 //---------get products
+$itemsperpage = 8;
 //product query
 $query = "SELECT * FROM products";
 //if there is filter, append filter to query
 if(count($_GET)>0){
-    $selectedcategory = $_GET["category"];
-    if($selectedcategory){
-        $query=$query." "."WHERE categoryid='$selectedcategory'";
-    }
+  //get the number of page requested
+  $page = $_GET["page"];
+  //number of items to show per page
+  
+  //offset for database query
+  $offset = $page*$itemsperpage;
+  if($page){
+    $query=$query." LIMIT $itemsperpage OFFSET $offset";
+  }
+  //the currently selected category
+  $selectedcategory = $_GET["category"];
+  
+  if($selectedcategory){
+      $query=$query." "."WHERE categoryid='$selectedcategory'";
+  }
+  $pricerange = $_GET["price"];
+  if($pricerange && !$selectedcategory){
+    $query=$query." "."WHERE price <= '$pricerange'";
+  }
+  if($pricerange && $selectedcategory){
+    $query=$query." "."AND price <= '$pricerange'";
+  }
 }
-//create an array to store products
+//if no GET variables
+else{
+  $query = $query." LIMIT $itemsperpage";
+  $page=0;
+}
+//echo $query;
+//create an array to store products retrieved from database
 $products = array();
 //execute query and store in result variable
 $result = $dbconnection->query($query);
 if($result->num_rows>0){
-    while($row = $result->fetch_assoc()){
-        //check if item is in cart
-        foreach($cartarray as $cartitem){
-          if($row["id"]==$cartitem["productid"]){
-            //if product exists in cart
-            $row["cart"] = true;
-          }
-        }
-        //check if item is in wishlist
-        foreach($wisharray as $wishitem){
-          if($row["id"]==$wishitem["productid"]){
-            $row["wish"] = true;
-          }
-        }
-        array_push($products,$row);
+  //total number of items
+  $totalitems = $result->num_rows;
+  //total number of pages of results
+  $totalpages = ceil($totalitems/$itemsperpage);
+  
+  echo $totalitems."/".$totalpages;
+  while($row = $result->fetch_assoc()){
+    //check if item is in cart
+    foreach($cartarray as $cartitem){
+      if($row["id"]==$cartitem["productid"]){
+        //if product exists in cart
+        $row["cart"] = true;
+      }
+      else{
+        $row["cart"] = false;
+      }
     }
+    //check if item is in wishlist
+    foreach($wisharray as $wishitem){
+      if($row["id"]==$wishitem["productid"]){
+        $row["wish"] = true;
+      }
+      else{
+        $row["wish"] = false;
+      }
+    }
+    array_push($products,$row);
+  }
 }
 
 //get categories
@@ -67,6 +107,7 @@ if($catresult->num_rows>0){
         array_push($categories,$row);
     }
 }
+
 ?>
 <!doctype html>
 <html>
@@ -88,19 +129,62 @@ if($catresult->num_rows>0){
                   $class="active";
                 }
                   
-                  echo "<li class=\"$class\"><a href=\"index.php\">all categories</a></li>";
-                  foreach($categories as $cat){
-                    $catid = $cat["category_id"];
-                    $catname = $cat["name"];
-                    if($current===$catid){$class="active";}else{$class="";}
-                    echo "<li class=\"$class\"><a href=\"index.php?category=$catid\">$catname</a></li>";
+                echo "<li class=\"$class\"><a href=\"index.php\">all categories</a></li>";
+                foreach($categories as $cat){
+                  $catid = $cat["category_id"];
+                  $catname = $cat["name"];
+                  if($current===$catid){
+                    $class="active";
                   }
+                  else{
+                    $class="";
+                  }
+                  echo "<li class=\"$class\"><a href=\"index.php?category=$catid\">$catname</a></li>";
+                }
                 ?>
                 </ul>
+              <h5>Price Range</h5>
+              <?php
+              //set an array of maximum prices
+              $prices = array(50,100,250,500);
+              //get the current price range selected
+              if($_GET["price"]){
+                $selectedprice = $_GET["price"];
+              }
+              ?>
+              <ul class="nav nav-stacked nav-pills">
+                <?php
+                if($_GET["price"]!=0){
+                  $class="";
+                }
+                else{
+                  $class="active";
+                }
+                echo "<li class=\"$class\"><a href=\"index.php?category=$selectedcategory&price=0\">
+                  All Prices</span>
+                  </a></li>";
+                foreach($prices as $price){
+                  //set class to active when the currently selected price matches one of the prices in the array
+                  //this will "highlight" the currently selected price in the sidebar
+                  if($selectedprice==$price){
+                    $class="active";
+                  }
+                  else{
+                    $class="";
+                  }
+                  echo "<li class=\"$class\"><a href=\"index.php?category=$selectedcategory&price=$price\">
+                  under <span class=\"price price-filter\">$price</span>
+                  </a></li>";
+                }
+                ?>
+              </ul>
             </div>
             <div class="col-md-10">
               <?php
               //render products with row
+              //count total number of products
+              $totalproducts = count($products);
+              //counter for product row
               $count = 0;
               foreach($products as $product){
                 $name = $product["name"];
@@ -111,7 +195,7 @@ if($catresult->num_rows>0){
                 if($count==1){
                     echo "<div class=\"row product-row\">";
                 }
-                    echo "<div class=\"col-md-4 product\">
+                    echo "<div class=\"col-md-3 product\">
                     <h3>$name</h3>
                     <a href='detail.php?id=$id'>
                     <img class='product-image' src='images/$image'>
@@ -131,12 +215,32 @@ if($catresult->num_rows>0){
                       </span>";
                     }
                     echo "</div>";
-                if($count>=3){
+                if($count>=4){
                     echo "</div>";
                     $count = 0;
                 }
               }
               ?>
+              <!--bottom row for pagination-->
+              <div class="row">
+                <div class="col-md-12">
+                  <nav aria-label="Page navigation" class="product-pagination">
+                    <ul class="pagination">
+                      <li>
+                        <a href="#" aria-label="Previous">
+                          <span aria-hidden="true">&laquo;</span>
+                        </a>
+                      </li>
+                      <li><a href="#">1</a></li>
+                      <li>
+                        <a href="#" aria-label="Next">
+                          <span aria-hidden="true">&raquo;</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+              </div>
             </div>
             </div>
         </div>

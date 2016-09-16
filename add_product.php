@@ -134,7 +134,7 @@ if(count($_POST)>0){
             </div>
             <div class="row">
               <div class="col-md-12 text-right">
-                <button class="btn btn-default" type="submit" name="submit" role="submit">Create Item</button>
+                <button class="btn btn-default" type="submit" name="submit" role="submit" value="submit">Create Item</button>
               </div>
             </div>
           </form>

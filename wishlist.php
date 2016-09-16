@@ -33,8 +33,22 @@ if($result->num_rows > 0){
     <div class="container">
       <div class="row">
         <div class="col-md-12">
-          
+          <h3>Your Favourite Items</h3>
         </div>
+      </div>
+      <div class="row">
+        <?php
+        foreach($wisharray as $wish){
+        $id = $wish["id"];
+        $name = $wish["name"];
+        $price = $wish["price"];
+        $quantity = $wish["quantity"];
+        $productid = $wish["productid"];
+        $image = $wish["image"];
+        $description = $wish["description"];
+        echo "<div>$name</div>";
+        }
+        ?>
       </div>
     </div>
   </body>

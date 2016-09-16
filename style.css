@@ -7,9 +7,12 @@
 }
 .price::before{
     content:"\0024";
-    color:#777;
+    color:inherit;
     display:"inline-block";
     padding-right:5px;
+}
+.price-filter::before{
+    padding-right:initial;
 }
 .product-price{
     font-size:18px;
@@ -27,6 +30,9 @@
 }
 .product-row{
     margin-bottom: 20px;
+}
+.product-pagination{
+    text-align:center;
 }
 /*image selector in add product*/
 .server-gallery-container{
@@ -78,4 +84,7 @@
 
 .quantity{
     max-width: 65px;
+}
+.wish-delete,.wish-buy{
+    display:inline-block;
 }

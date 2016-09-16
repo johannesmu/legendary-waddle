@@ -16,7 +16,7 @@ if(count($_POST)>0){
     //set success to true
     $success=true;
     //set last login time for user
-    //generateDateTime function is in session.php file
+    //generateDateTime() function is in session.php file
     $lastlogin = generateDateTime();
     $logintimequery = "UPDATE users SET lastlogin='$lastlogin' WHERE id='$loggedinuserid'";
     $dbconnection->query($logintimequery);
@@ -27,12 +27,28 @@ if(count($_POST)>0){
     //find cart items in the database
     $cartquery = "SELECT productid FROM cart WHERE userid='$currentuserid'";
     $cartresult = $dbconnection->query($cartquery);
-    //if there are items in the cart
+    //if there are items in the cart from before login
     if($cartresult->num_rows > 0){
       //update all cart items that the user added before logging in to the current user
       $query="UPDATE cart SET userid='$loggedinuserid' WHERE userid='$currentuserid'";
       $dbconnection->query($query);
+      //assign quantities from items before login to items in the cart belonging to user
+      $addquery="UPDATE cart AS r JOIN
+                ( SELECT id, productid, SUM(quantity) AS totalquantity
+                  FROM cart 
+                  WHERE userid='$loggedinuserid'
+                  GROUP BY productid
+                ) AS grp
+                ON  
+                grp.productid = r.productid
+                SET 
+                r.quantity = grp.totalquantity
+                WHERE 
+                r.userid = '$loggedinuserid'";
+      //run the query
+      $dbconnection->query($addquery);
     }
+    
     $wishquery = "SELECT productid FROM wishlist WHERE userid='$currentuserid'";
     $wishresult = $dbconnection->query($wishquery);
     if($wishresult->num_rows > 0){
@@ -40,23 +56,18 @@ if(count($_POST)>0){
       $query="UPDATE wishlist SET userid='$loggedinuserid' WHERE userid='$currentuserid'";
       $dbconnection->query($query);
       //merge duplicate products, if found
-      $wisharray = array();
-      $query = "SELECT * FROM wishlist WHERE userid='$currentuserid'";
-      $records = $dbconnection->query($query);
-      if($records->num_rows > 0){
-        //add the wishlist items to array
-        while($row = $records->fetch_assoc()){
-          array_push($wisharray,$row);
-        }
-        
-      }
+      $dedupquery="DELETE e1 FROM wishlist e1, wishlist e2 WHERE e1.productid = e2.productid AND e1.id > e2.id
+      AND e1.userid='$loggedinuserid' AND e2.userid='$loggedinuserid'";
+      $dbconnection->query($dedupquery);
     }
     
     //regenerate user id after logging in to prevent session fixation attack
     //see https://goo.gl/a6q56W
     session_regenerate_id();
     //create session variables using user data from database
+    //create a session variable named "email" to indicate that user is logged in
     $_SESSION["email"]=$stored_email;
+    //create a session variable named "id" with the user id
     $_SESSION["id"]=$userdata["id"];
     
     //if user is an admin

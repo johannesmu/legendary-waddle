@@ -44,13 +44,14 @@ if($_POST["submit"]=="cart"){
           //update the cart item quantity in database
           $query = "UPDATE cart SET quantity='$newquantity' WHERE productid='$cartitemid'";
           if($dbconnection->query($query)){
-            //if update to database is successful update the cart session
+            //if update to database is successful update the cart session variable
             $_SESSION["cart"][$i]["quantity"] = $newquantity;
             //set success to true
             $success=true;
           }
           else{
             //if database update failed set success to false
+            //we don't update the cart session variable
             $success=false;
           }
         }
@@ -65,7 +66,7 @@ if($_POST["submit"]=="cart"){
       VALUES ('$userid','$productid','$quantity','0','$time')";
       //if adding to database succeeds
       if($dbconnection->query($query)){
-        //add it to session cart
+        //add it to session cart variable
         array_push($_SESSION["cart"],array("productid"=>$productid,"quantity"=>$quantity));
         $success=true;
       }
@@ -81,7 +82,7 @@ if($_POST["submit"]=="cart"){
 
 
 //-------if the wishlist button has been clicked
-elseif($_POST["submit"]=="wish"){
+if($_POST["submit"]=="wish"){
   //add to the wishlist
   //sanitise the product id
   $productid = filter_var($_POST["productid"],FILTER_SANITIZE_NUMBER_INT);
