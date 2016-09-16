@@ -192,11 +192,12 @@ if($catresult->num_rows>0){
                 $id = $product["id"];
                 $image = $product["image"];
                 $count++;
+                $productcount++;
                 if($count==1){
                     echo "<div class=\"row product-row\">";
                 }
                     echo "<div class=\"col-md-3 product\">
-                    <h3>$name</h3>
+                    <h3>$name $count</h3>
                     <a href='detail.php?id=$id'>
                     <img class='product-image' src='images/$image'>
                     </a>
@@ -215,7 +216,7 @@ if($catresult->num_rows>0){
                       </span>";
                     }
                     echo "</div>";
-                if($count>=4){
+                if($count>=4 || $productcount == $totalproducts){
                     echo "</div>";
                     $count = 0;
                 }
