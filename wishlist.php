@@ -2,6 +2,7 @@
 include("includes/session.php");
 include("includes/dbconnection.php");
 
+$userid = $_SESSION["id"];
 //----------display cart items
 //create array to store cart contents
 $wisharray = array();
@@ -10,6 +11,7 @@ $wisharray = array();
 $query = "SELECT 
           wishlist.id AS id,
           wishlist.productid AS productid,
+          wishlist.time AS time,
           products.image AS image,
           products.name AS name,
           products.description AS description,
@@ -42,11 +44,20 @@ if($result->num_rows > 0){
         $id = $wish["id"];
         $name = $wish["name"];
         $price = $wish["price"];
-        $quantity = $wish["quantity"];
+        $time = $wish["time"];
         $productid = $wish["productid"];
         $image = $wish["image"];
         $description = $wish["description"];
-        echo "<div>$name</div>";
+        //work out how long ago the product was added
+        $now = new DateTime(generateDateTime());
+        $storedtime = new DateTime($time);
+        $ago = $now->diff($storedtime);
+        echo "<div class=\"col-md-2\">
+        <h4>$name</h4>
+          <img class=\"img-responsive\" src=\"images/$image\">
+          <p class=\"price\">$price</p>
+          <p>This product was added $ago->format('%y years %m months %a days %h hours %i minutes %S seconds'') ago</p>
+        </div>";
         }
         ?>
       </div>

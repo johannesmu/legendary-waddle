@@ -8,13 +8,17 @@ $userid = $_SESSION["id"];
 //---------get shopping cart products from database
 //this is to find out which items are already in the cart
 $cartarray = array();
-$cartquery = "SELECT productid FROM cart WHERE userid='$userid'";
-$cartresult = $dbconnection->query($cartquery);
-if($cartresult->num_rows>0){
-  while($row=$cartresult->fetch_assoc()){
-    array_push($cartarray,$row);
-  }
+//get cart items from SESSION
+foreach($_SESSION["cart"] as $sessioncartitem){
+  array_push($cartarray,$sessioncartitem);
 }
+// $cartquery = "SELECT productid FROM cart WHERE userid='$userid'";
+// $cartresult = $dbconnection->query($cartquery);
+// if($cartresult->num_rows>0){
+//   while($row=$cartresult->fetch_assoc()){
+//     array_push($cartarray,$row);
+//   }
+// }
 $cartlength = count($cartarray);
 //---------get wishlist products
 $wisharray = array();
@@ -60,7 +64,7 @@ if(count($_GET)>0){
 //if no GET variables
 else{
   $query = $query." LIMIT $itemsperpage";
-  $page=0;
+  $page=1;
 }
 //echo $query;
 //create an array to store products retrieved from database
@@ -68,12 +72,11 @@ $products = array();
 //execute query and store in result variable
 $result = $dbconnection->query($query);
 if($result->num_rows>0){
-  //total number of items
+  //total number of products
   $totalitems = $result->num_rows;
-  //total number of pages of results
+  //total number of pages of results is total/item per page number
   $totalpages = ceil($totalitems/$itemsperpage);
   
-  echo $totalitems."/".$totalpages;
   while($row = $result->fetch_assoc()){
     //check if item is in cart
     foreach($cartarray as $cartitem){
@@ -97,6 +100,7 @@ if($result->num_rows>0){
     array_push($products,$row);
   }
 }
+// print_r($products);
 
 //get categories
 $catquery = "SELECT * FROM categories";
@@ -197,7 +201,7 @@ if($catresult->num_rows>0){
                     echo "<div class=\"row product-row\">";
                 }
                     echo "<div class=\"col-md-3 product\">
-                    <h3>$name $count</h3>
+                    <h4>$name $count</h4>
                     <a href='detail.php?id=$id'>
                     <img class='product-image' src='images/$image'>
                     </a>

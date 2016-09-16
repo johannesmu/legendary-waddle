@@ -59,6 +59,7 @@
 .shop-buttons{
     text-decoration:none;
     color:inherit;
+    min-height: 36px;
     /*padding:0 5px;*/
     /*font-size:18px;*/
 }
@@ -87,4 +88,7 @@
 }
 .wish-delete,.wish-buy{
     display:inline-block;
+}
+.cart-price{
+    font-size:18px;
 }

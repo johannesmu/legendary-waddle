@@ -4,13 +4,14 @@ include("includes/dbconnection.php");
 
 //redirect to originating page ie page where add to cart button was clicked when done
 $redirect = ($_SERVER[HTTP_REFERER]);
-//prevent multiple of the same variable
-if(strpos($redirect,'&success=true')){
+//prevent multiple success GET variables
+// if the url contains "&success=true" then strip it
+if(strpos($redirect,'&success=true') || strpos($redirect,'&success=')){
   $redirect = str_replace('&success=true','',$redirect);
 }
-if(strpos($redirect,'&success=')){
-  $redirect = str_replace('&success=true','',$redirect);
-}
+// if(strpos($redirect,'&success=')){
+//   $redirect = str_replace('&success=true','',$redirect);
+// }
 
 //-------------Shopping Cart-------------
 //because the form contains two submit buttons, if button with value "cart" is clicked
@@ -60,7 +61,6 @@ if($_POST["submit"]=="cart"){
     //if item does not exist in cart
     if($itemincart==false){
       //add it to database
-      echo "<p>user:$userid product:$productid quantity:$quantity status:$status time:$time</p>";
       $query = 
       "INSERT INTO cart (userid,productid,quantity,status,time) 
       VALUES ('$userid','$productid','$quantity','0','$time')";
@@ -90,7 +90,6 @@ if($_POST["submit"]=="wish"){
   $time = generateDateTime();
   //get user id
   $userid = $_SESSION["id"];
-  echo "<p>user: $userid product: $productid time: $time </p>";
   //check if there is a wishlist session variable, if not create one
   if(!$_SESSION["wishlist"]){
     $_SESSION["wishlist"]=array();
@@ -100,6 +99,7 @@ if($_POST["submit"]=="wish"){
   $wishcount = count($_SESSION["wishlist"]);
   //if there are items in wishlist
   if($wishcount > 0){
+    //assume item does not exist i wishlist
     $itemexists = false;
     //loop through all items in wishlist
     for($i=0;$i<$wishcount;$i++){
@@ -120,11 +120,16 @@ if($_POST["submit"]=="wish"){
         $success=false;
       }
     }
+    else{
+      // if item exists in wishlist, then don't add it again
+    }
   }
+  //if there are no items already in wishlist
   else{
     //add to database
     $query = "INSERT INTO wishlist (productid,time,userid) VALUES ('$productid','$time','$userid')";
     if($dbconnection->query($query)){
+      //add it to the wishlist session variable
       array_push($_SESSION["wishlist"],$productid);
       $success=true;
     }

@@ -1,7 +1,7 @@
 <?php
 $host="localhost";
-$user="testuser";
-$password="password";
+$user=getenv('username');
+$password=getenv('dbpassword');
 $database="test";
 $dbconnection = mysqli_connect($host,$user,$password,$database);
 

@@ -18,8 +18,6 @@ if($_POST["submit"]=="delete"){
     for($i=0;$i<$cartcount;$i++){
       $cartitem = $_SESSION["cart"][$i]["productid"];
       if($_SESSION["cart"][$i]["productid"]==$productid){
-        //$_SESSION["found"] = true;
-        //array_splice($_SESSION["cart"][$i],1);
         unset($_SESSION["cart"][$i]);
       }
     }
@@ -50,7 +48,7 @@ if($_POST["submit"]=="update"){
   }
   if($dbconnection->query($query)){
     // update the session cart
-    foreach($_SESSION["cart"] as &$cartitem){
+    foreach($_SESSION["cart"] as $cartitem){
       if($cartitem["productid"]==$productid){
         $cartitem["quantity"]=$newquantity;
       }
@@ -131,11 +129,14 @@ if($result->num_rows > 0){
           </div>
           <div class=\"col-md-4\">
             <h4>$name</h4>
-            <p class=\"price\">$price</p>
+            
             <p>$description</p>
             <p><a href=\"detail.php?id=$productid\">Product detail</a></p>
           </div>
-          <div class=\"col-md-6 text-right\">
+          <div class=\"col-md-2\">
+            <p class=\"price cart-price\">$price</p>
+          </div>
+          <div class=\"col-md-4 text-right\">
             <form class=\"form-inline\" action=\"shopping-cart.php\" method=\"post\">
               <input type=\"hidden\" name=\"id\" value=\"$id\">
               <input type=\"hidden\" name=\"productid\" value=\"$productid\">
@@ -152,9 +153,11 @@ if($result->num_rows > 0){
         echo 
         "<div class=\"row\">
           <div class=\"col-md-6 col-md-offset-6 text-right\">
+            <strong>
             total items: $totalitems
             &nbsp;
             total price: <span class=\"price\">$totalprice</span>
+            </strong>
           </div>
         </div>";
       ?>
