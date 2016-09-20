@@ -12,13 +12,7 @@ $cartarray = array();
 foreach($_SESSION["cart"] as $sessioncartitem){
   array_push($cartarray,$sessioncartitem);
 }
-// $cartquery = "SELECT productid FROM cart WHERE userid='$userid'";
-// $cartresult = $dbconnection->query($cartquery);
-// if($cartresult->num_rows>0){
-//   while($row=$cartresult->fetch_assoc()){
-//     array_push($cartarray,$row);
-//   }
-// }
+
 $cartlength = count($cartarray);
 //---------get wishlist products
 $wisharray = array();
@@ -33,50 +27,93 @@ $wishlength = count($wisharray);
 
 
 //---------get products
-$itemsperpage = 8;
+
 //product query
-$query = "SELECT * FROM products";
-//if there is filter, append filter to query
-if(count($_GET)>0){
-  //get the number of page requested
-  $page = $_GET["page"];
-  //number of items to show per page
+
+//if there is price or category or page number, append to query
+//check if there are any GET variables set
+
+if(isset($_GET)){
+  //-----the number of products to show on a page
+  if(isset($_GET["itemsperpage"]) && $_GET["itemsperpage"]>0){
+    $itemsperpage = $_GET["itemsperpage"];
+  }
+  else{
+    //if variable is not set, set the default
+    $itemsperpage = 8;
+  }
   
-  //offset for database query
-  $offset = $page*$itemsperpage;
+  //-----which page of results to show
+  if(isset($_GET["page"]) && $_GET["page"] > 0){
+    $page = $_GET["page"];
+  }
+  //if not, set page to 1
+  else{
+    $page=1;
+  }
+  
+  //-----which category to show
+  if(isset($_GET["category"]) && $_GET["category"] > 0){
+    $selectedcategory = $_GET["category"];
+  }
+  else{
+    $selectedcategory = 0;
+  }
+  //-----price range
+  if(isset($_GET["price"]) && $_GET["price"] > 0){
+    $pricerange = $_GET["price"];
+  }
+  else{
+    $pricerange = 0;
+  }
+  //----build query
+  
+  $query = "SELECT * FROM products";
+  //if category number is larger than 0
+  if($selectedcategory > 0){
+      $query=$query." "."WHERE categoryid='$selectedcategory'";
+  }
+  //if price range is set and 'all categories' is selected
+  if($pricerange > 0 && $selectedcategory==0){
+    $query=$query." "."WHERE price <= '$pricerange'";
+  }
+  //if price range is set and a category is selected
+  if($pricerange > 0 && $selectedcategory > 0){
+    $query=$query." "."AND price <= '$pricerange'";
+  }
+  
+  //before limit and offset is applied, get the total number of products
+  //with category and price applied so we can get the total number of products
+  //to display and total number of pages
+  $totalresult = $dbconnection->query($query);
+  if($totalresult->num_rows > 0){
+    //total number of products
+    $totalitems = $totalresult->num_rows;
+    //total number of pages of results is total/item per page number
+    $totalpages = ceil($totalitems/$itemsperpage);
+  }
+  //offset for database query to generate "pages" of data
+  $offset =($page-1)*$itemsperpage;
+  //append offset and items per page to query
   if($page){
     $query=$query." LIMIT $itemsperpage OFFSET $offset";
   }
-  //the currently selected category
-  $selectedcategory = $_GET["category"];
-  
-  if($selectedcategory){
-      $query=$query." "."WHERE categoryid='$selectedcategory'";
-  }
-  $pricerange = $_GET["price"];
-  if($pricerange && !$selectedcategory){
-    $query=$query." "."WHERE price <= '$pricerange'";
-  }
-  if($pricerange && $selectedcategory){
-    $query=$query." "."AND price <= '$pricerange'";
-  }
 }
-//if no GET variables
+//if no GET variables is set
 else{
+  $selectedcategory = 0;
+  $pricerange = 0;
   $query = $query." LIMIT $itemsperpage";
   $page=1;
 }
-//echo $query;
+
+
+
 //create an array to store products retrieved from database
 $products = array();
 //execute query and store in result variable
 $result = $dbconnection->query($query);
 if($result->num_rows>0){
-  //total number of products
-  $totalitems = $result->num_rows;
-  //total number of pages of results is total/item per page number
-  $totalpages = ceil($totalitems/$itemsperpage);
-  
   while($row = $result->fetch_assoc()){
     //check if item is in cart
     foreach($cartarray as $cartitem){
@@ -133,7 +170,7 @@ if($catresult->num_rows>0){
                   $class="active";
                 }
                   
-                echo "<li class=\"$class\"><a href=\"index.php\">all categories</a></li>";
+                echo "<li class=\"$class\"><a href=\"index.php?category=0&page=$page&price=$pricerange\">all categories</a></li>";
                 foreach($categories as $cat){
                   $catid = $cat["category_id"];
                   $catname = $cat["name"];
@@ -143,7 +180,7 @@ if($catresult->num_rows>0){
                   else{
                     $class="";
                   }
-                  echo "<li class=\"$class\"><a href=\"index.php?category=$catid\">$catname</a></li>";
+                  echo "<li class=\"$class\"><a href=\"index.php?category=$catid&page=$page&price=$pricerange\">$catname</a></li>";
                 }
                 ?>
                 </ul>
@@ -164,7 +201,7 @@ if($catresult->num_rows>0){
                 else{
                   $class="active";
                 }
-                echo "<li class=\"$class\"><a href=\"index.php?category=$selectedcategory&price=0\">
+                echo "<li class=\"$class\"><a href=\"index.php?category=$selectedcategory&price=0&page=1\">
                   All Prices</span>
                   </a></li>";
                 foreach($prices as $price){
@@ -176,7 +213,7 @@ if($catresult->num_rows>0){
                   else{
                     $class="";
                   }
-                  echo "<li class=\"$class\"><a href=\"index.php?category=$selectedcategory&price=$price\">
+                  echo "<li class=\"$class\"><a href=\"index.php?category=$selectedcategory&price=$price&page=1\">
                   under <span class=\"price price-filter\">$price</span>
                   </a></li>";
                 }
@@ -226,28 +263,58 @@ if($catresult->num_rows>0){
                 }
               }
               ?>
-              <!--bottom row for pagination-->
-              <div class="row">
+              
+              
+            </div>
+            </div>
+            <!--bottom row for pagination-->
+            <div class="row">
                 <div class="col-md-12">
                   <nav aria-label="Page navigation" class="product-pagination">
                     <ul class="pagination">
                       <li>
-                        <a href="#" aria-label="Previous">
-                          <span aria-hidden="true">&laquo;</span>
+                        <?php
+                        if($totalpages > 1 && $page > 1){
+                          $prevpage = $page-1;
+                          echo 
+                          "<a href=\"index.php?category=$selectedcategory&price=$pricerange&page=$prevpage\" aria-label=\"Previous\">
+                            <span aria-hidden=\"true\">&laquo;</span>
+                          </a>";
+                        }
+                        
+                        ?>
+                      </li>
+                      <?php
+                      if($totalpages>1){
+                        for($i=0;$i<$totalpages;$i++){
+                          $pagenumber = $i+1;
+                          if($pagenumber==$page){
+                            $class="active";
+                          }
+                          else{
+                            $class="";
+                          }
+                          echo "<li class=\"$class\"><a href=\"index.php?category=$selectedcategory&price=$pricerange&page=$pagenumber\">$pagenumber</a></li>";
+                        }
+                      }
+                      
+                      if($totalpages>1 && $page<$totalpages){
+                        $nextpage = $page+1;
+                      echo "<li>
+                        <a href=\"index.php?category=$selectedcategory&price=$pricerange&page=$nextpage\" aria-label=\"Next\">
+                          <span aria-hidden=\"true\">&raquo;</span>
                         </a>
                       </li>
-                      <li><a href="#">1</a></li>
-                      <li>
-                        <a href="#" aria-label="Next">
-                          <span aria-hidden="true">&raquo;</span>
-                        </a>
-                      </li>
+                      ";
+                      }
+                      ?>
                     </ul>
                   </nav>
+                  <?php
+                  echo "<p class=\"text-center\">$page of $totalpages pages</p>";
+                  ?>
                 </div>
               </div>
-            </div>
-            </div>
         </div>
        <?php include("includes/scripts.php");?>
     </body>
