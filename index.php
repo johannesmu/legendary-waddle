@@ -310,9 +310,6 @@ if($catresult->num_rows>0){
                       ?>
                     </ul>
                   </nav>
-                  <?php
-                  echo "<p class=\"text-center\">$page of $totalpages pages</p>";
-                  ?>
                 </div>
               </div>
         </div>

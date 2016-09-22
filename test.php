@@ -9,7 +9,5 @@ foreach($result as $file){
         //echo $hash."&nbsp;".$count++." ".$file."<br>";
     }
 }
-echo getenv('dbpassword')."<br>";
-echo getenv('sendgridapi')."<br>";
-echo getenv('username');
+
 ?>

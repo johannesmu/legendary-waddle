@@ -1,28 +1,91 @@
 <?php
 //uncomment for session debugging purposes
 //print_r($_SESSION);
+//navigation class
+//the navigation class will control which navigation items are shown, depending on the status
+//of the user, whether it is non authenticated, authenticated or admin
+class Navigation{
+  //get current file name
+  private $_current;
+  private $_emailsession;
+  private $_adminsession;
+  private $_connection;
+  private $_navitems = array();
+  private $_groups = array();
+  private $_pagequery = "SELECT title,link,linktext,pagegroup FROM pages WHERE active=1";
+  private $_groupsquery = "SELECT id,name FROM navgroup";
+  public function __construct($connection,$emailsession,$adminsession){
+    $this->_current = basename($_SERVER["REQUEST_URI"]);
+    $this->_connection = $connection;
+    $this->_emailsession = $emailsession;
+    $this->_adminsession = $adminsession;
+    if(!$emailsession){
+      $this->_pagequery = $this->_pagequery." AND needlogin=0";
+    }
+    if(!$adminsession){
+      $this->_pagequery = $this->_pagequery." AND needadmin=0";
+    }
+    $pageresult = $this->_connection->query($this->_pagequery);
+    if($pageresult->num_rows > 0){
+      while($navitem = $pageresult->fetch_assoc()){
+        array_push($this->_navitems,$navitem);
+      }
+    }
+    $groupsresult = $this->_connection->query($this->_groupsquery);
+  }
+  public function getItems(){
+    return $this->_navitems;
+  }
+  public function __toString(){
+    $items = array();
+    $length = count($this->_navitems);
+    for($i=0;$i<$length;$i++){
+      $link = $this->_navitems[$i]["link"];
+      $linktext = $this->_navitems[$i]["linktext"];
+      //add active class to the current page
+      if($link==$this->_current){
+        $class = "class=\"active\"";
+      }
+      else{
+        $class="";
+      }
+      //if user is logged in, remove the sign in page
+      if($link=="login.php" && $this->_emailsession){
+        $navitem = "";
+      }
+      else{
+        $navitem = "<li $class><a href=\"$link\">$linktext</a></li>";
+      }
+      array_push($items,$navitem);
+    }
+    return implode($items);
+  }
+}
+
 ?>
 <nav class="navbar navbar-default">
   <div class="container-fluid">
     <ul class="nav navbar-nav">
-      <li><a href="index.php">Home</a></li>
+      <!--<li><a href="index.php">Home</a></li>-->
       <?php
       //if user is not logged in
-      if(!$_SESSION["email"]){
+      /*if(!$_SESSION["email"]){
         echo "<li><a href=\"register.php\">Register</a></li>";
         echo "<li><a href=\"login.php\">Sign In</a></li>";
-      }
+      }*/
       ?>
       <?php
       //if the user is logged in
-      if($_SESSION["email"]){
+      /*if($_SESSION["email"]){
         //if the user is an admin, show the dashboard
         if($_SESSION["admin"]){
           echo "<li><a href=\"dashboard.php\">Dashboard</a></li>";
         }
         echo "<li><a href=\"user-dashboard.php\">My Account</a></li>";
         echo "<li><a href=\"logout.php\">Logout</a></li>";
-      }
+      }*/
+      $navigation = new Navigation($dbconnection,$_SESSION["email"],$_SESSION["admin"]);
+      echo $navigation;
       ?>
     </ul>
     <form class="navbar-form navbar-right" action="search.php" method="get">
