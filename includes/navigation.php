@@ -20,11 +20,14 @@ class Navigation{
     $this->_emailsession = $emailsession;
     $this->_adminsession = $adminsession;
     if(!$emailsession){
+      //
       $this->_pagequery = $this->_pagequery." AND needlogin=0";
     }
     if(!$adminsession){
       $this->_pagequery = $this->_pagequery." AND needadmin=0";
     }
+    //order pages using column showorder
+    $this->_pagequery = $this->_pagequery." ORDER BY showorder";
     $pageresult = $this->_connection->query($this->_pagequery);
     if($pageresult->num_rows > 0){
       while($navitem = $pageresult->fetch_assoc()){
@@ -60,31 +63,19 @@ class Navigation{
     }
     return implode($items);
   }
+  public function getQuery(){
+    //return $this->_pagequery;
+  }
 }
 
 ?>
 <nav class="navbar navbar-default">
   <div class="container-fluid">
     <ul class="nav navbar-nav">
-      <!--<li><a href="index.php">Home</a></li>-->
       <?php
-      //if user is not logged in
-      /*if(!$_SESSION["email"]){
-        echo "<li><a href=\"register.php\">Register</a></li>";
-        echo "<li><a href=\"login.php\">Sign In</a></li>";
-      }*/
-      ?>
-      <?php
-      //if the user is logged in
-      /*if($_SESSION["email"]){
-        //if the user is an admin, show the dashboard
-        if($_SESSION["admin"]){
-          echo "<li><a href=\"dashboard.php\">Dashboard</a></li>";
-        }
-        echo "<li><a href=\"user-dashboard.php\">My Account</a></li>";
-        echo "<li><a href=\"logout.php\">Logout</a></li>";
-      }*/
+      //create navigation
       $navigation = new Navigation($dbconnection,$_SESSION["email"],$_SESSION["admin"]);
+      //output navigation
       echo $navigation;
       ?>
     </ul>

@@ -1,6 +1,5 @@
 <?php
-//get site content
-$contentquery = "SELECT";
+
 ?>
 <head>
   <title>Hello There</title>
